@@ -1,0 +1,177 @@
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+
+-- Création de l'interface
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "LightsApSpammer_Gui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+-- Fenêtre principale
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 200, 0, 340)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -170)
+mainFrame.BackgroundColor3 = Color3.fromRGB(173, 216, 230)
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 139)
+mainFrame.Active = true
+mainFrame.Draggable = true 
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+-- Titre "Lights Ap Spammer"
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Text = "Lights Ap Spammer"
+title.Size = UDim2.new(1, -40, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(135, 206, 250)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22
+title.Parent = mainFrame
+
+-- Bouton Réduire / Agrandir
+local reduceBtn = Instance.new("TextButton")
+reduceBtn.Name = "ReduceBtn"
+reduceBtn.Text = "_"
+reduceBtn.Size = UDim2.new(0, 40, 0, 40)
+reduceBtn.Position = UDim2.new(1, -40, 0, 0)
+reduceBtn.BackgroundColor3 = Color3.fromRGB(100, 149, 237)
+reduceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+reduceBtn.Font = Enum.Font.SourceSansBold
+reduceBtn.TextSize = 25
+reduceBtn.Parent = mainFrame
+
+-- Zone de défilement (Scroll)
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Name = "PlayerList"
+scrollingFrame.Size = UDim2.new(1, -10, 1, -90)
+scrollingFrame.Position = UDim2.new(0, 5, 0, 45)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollingFrame.ScrollBarThickness = 6
+scrollingFrame.Parent = mainFrame
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 5)
+layout.Parent = scrollingFrame
+
+-- Crédits
+local credit = Instance.new("TextLabel")
+credit.Name = "Credit"
+credit.Text = "Made by light"
+credit.Size = UDim2.new(1, 0, 0, 20)
+credit.Position = UDim2.new(0, 0, 1, -40)
+credit.BackgroundTransparency = 1
+credit.TextColor3 = Color3.fromRGB(0, 0, 0)
+credit.Font = Enum.Font.SourceSans
+credit.TextSize = 14
+credit.Parent = mainFrame
+
+-- Discord
+local discord = Instance.new("TextLabel")
+discord.Name = "Discord"
+discord.Text = "Discord: https://discord.gg/r7ZzYt7x"
+discord.Size = UDim2.new(1, 0, 0, 20)
+discord.Position = UDim2.new(0, 0, 1, -20)
+discord.BackgroundTransparency = 1
+discord.TextColor3 = Color3.fromRGB(0, 0, 0)
+discord.Font = Enum.Font.SourceSans
+discord.TextSize = 14
+discord.Parent = mainFrame
+
+-- Effet de neige simple
+local function createSnowflake()
+	local flake = Instance.new("Frame")
+	flake.Size = UDim2.new(0, 5, 0, 5)
+	flake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	flake.BorderSizePixel = 0
+	flake.Position = UDim2.new(math.random(), 0, 0, 0)
+	flake.Parent = mainFrame
+
+	local function fall()
+		local pos = flake.Position
+		local newY = pos.Y.Scale + 0.01
+		if newY > 1 then
+			newY = 0
+			flake.Position = UDim2.new(math.random(), 0, 0, 0)
+		else
+			flake.Position = UDim2.new(pos.X.Scale, 0, newY, 0)
+		end
+		task.wait(0.05)
+		fall()
+	end
+	fall()
+end
+
+for i = 1, 50 do
+	createSnowflake()
+end
+
+-- Logique de réduction
+local isReduced = false
+reduceBtn.MouseButton1Click:Connect(function()
+	if isReduced then
+		mainFrame:TweenSize(UDim2.new(0, 200, 0, 340), "Out", "Quart", 0.3, true)
+		scrollingFrame.Visible = true
+		reduceBtn.Text = "_"
+		isReduced = false
+	else
+		mainFrame:TweenSize(UDim2.new(0, 200, 0, 40), "Out", "Quart", 0.3, true)
+		scrollingFrame.Visible = false
+		reduceBtn.Text = "+"
+		isReduced = true
+	end
+end)
+
+-- Fonction d'envoi des commandes
+local function runCommands(targetPlayer)
+	local commandes = {
+		";jumpscare ", 
+		";morph ", 
+		";tiny ", 
+		";rocket ", 
+		";jail ", 
+		";ragdoll ", 
+		";inverse ",
+		";balloon " -- Correction orthographique ici
+	}
+
+	for _, cmd in pairs(commandes) do
+		local messageFinal = cmd .. targetPlayer.Name
+
+		if TextChatService.ChatInputBarConfiguration.TargetTextChannel then
+			TextChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(messageFinal)
+		else
+			local chatEvent = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
+			if chatEvent then
+				chatEvent.SayMessageRequest:FireServer(messageFinal, "All")
+			end
+		end
+		task.wait() -- Vitesse max
+	end
+end
+
+-- Mise à jour de la liste des joueurs
+local function updateList()
+	for _, child in pairs(scrollingFrame:GetChildren()) do
+		if child:IsA("TextButton") then child:Destroy() end
+	end
+	for _, player in pairs(Players:GetPlayers()) do
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(1, -10, 0, 35)
+		btn.Text = "@" .. player.Name
+		btn.BackgroundColor3 = Color3.fromRGB(240, 248, 255)
+		btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+		btn.Font = Enum.Font.SourceSans
+		btn.TextSize = 16
+		btn.Parent = scrollingFrame
+		btn.MouseButton1Click:Connect(function() runCommands(player) end)
+	end
+	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
+end
+
+Players.PlayerAdded:Connect(updateList)
+Players.PlayerRemoving:Connect(updateList)
+updateList()
