@@ -83,13 +83,18 @@ discord.Parent = mainFrame
 
 -- Effet de neige lisse (plus de flocons, vitesse ajustée pour fluidité)
 local function createSnowflake()
+    local size = math.random(3,6)
     local flake = Instance.new("Frame")
-    flake.Size = UDim2.new(0, math.random(3,6), 0, math.random(3,6))
+    flake.Size = UDim2.new(0, size, 0, size)
     flake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     flake.BorderSizePixel = 0
     flake.Position = UDim2.new(math.random(), 0, -0.05, 0)  -- Commence légèrement au-dessus
     flake.Transparency = math.random(30,70)/100  -- Varier la transparence pour effet naturel
     flake.Parent = mainFrame
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.5, 0)
+    corner.Parent = flake
     
     local tweenInfo = TweenInfo.new(
         math.random(3,6),  -- Durée aléatoire pour variation
